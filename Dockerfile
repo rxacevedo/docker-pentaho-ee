@@ -1,4 +1,4 @@
-FROM java:7
+FROM tomcat:7
 
 MAINTAINER rxacevedo@fastmail.com
 
@@ -20,14 +20,17 @@ RUN apt-get update; \
     apt-get install wget unzip git vim -y; \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN mkdir -p ${PENTAHO_HOME}/tmp; useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; chown pentaho:pentaho ${PENTAHO_HOME}
+RUN mkdir -p ${PENTAHO_HOME}/tmp; useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; chown -R pentaho:pentaho ${PENTAHO_HOME}
+
+ADD res/* /tmp/
+RUN mkdir -p /tmp/extract
+# This will go away...shh...
+RUN chmod -R 777 /tmp
 
 USER pentaho
 
 # This is for development, Will be replaced by pulling deps from the FTP
-ADD res/* /tmp/
 # RUN wget -m -P /tmp ftp://${USER}:${PASS}@supportftp.pentaho.com/Enterprise%20Software/Pentaho_BI_Suite/${PENTAHO_VERSION}-GA/BA-Server/Manual%20Build/
-RUN mkdir -p /tmp/extract
               
 # Unzip the things
 RUN for i in $(echo ${COMPONENTS} | tr ':' '\n'); \
