@@ -23,7 +23,6 @@ RUN apt-get update; \
 RUN mkdir -p ${PENTAHO_HOME}/tmp; useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; chown -R pentaho:pentaho ${PENTAHO_HOME}
 
 ADD res/* /tmp/
-RUN mkdir -p /tmp/extract
 # This will go away...shh...
 RUN chmod -R 777 /tmp
 
@@ -32,31 +31,51 @@ RUN chmod -R 777 /tmp
               
 # Unzip the things
 RUN for i in $(echo ${COMPONENTS} | tr ':' '\n'); \
-    do echo "$i-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip"; \
-    /usr/bin/unzip -q /tmp/"$i-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip" -d  ${PENTAHO_HOME}/tmp; \
-    rm -rf /tmp/"$i-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip"; \
+    do echo $i-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip; \
+    /usr/bin/unzip -q /tmp/$i-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip -d  ${PENTAHO_HOME}/tmp; \
+    rm -rf /tmp/$i-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip; \
     done
 
 WORKDIR $PENTAHO_HOME/tmp
 
-# Run the installer headless
+# Run the installers headless
 RUN for i in $(ls -d */); \
     do cd $i; \
     java -jar installer.jar /tmp/auto-install.xml; \
     cd ..; \
     done
   
+# Get rid of the downloaded zips
+RUN rm -rf /tmp/*
+
+# Move the wars
+RUN mv ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/*.war ${CATALINA_HOME}/webapps
+
+# This is the folder structure that Pentaho expects
+RUN mkdir -p ${PENTAHO_HOME}/server/biserver-ee
+
+# This one doesn't have dist at the end of the filename...
+RUN unzip -q ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-solutions.zip -d ${PENTAHO_HOME}/server/biserver-ee
+RUN unzip -q ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-data.zip -d ${PENTAHO_HOME}/server/biserver-ee
+
+# Done with this
+RUN rm -rf ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/
+
+WORKDIR $PENTAHO_HOME
+
+RUN rm -rf tmp/; \
+    cp -r $(ls | grep '[^server]') ${PENTAHO_HOME}/server/biserver-ee/pentaho-solutions/system; \
+    rm -rf $(ls | grep '[^server]') 
+
+RUN ln -s ${CATALINA_HOME} ${PENTAHO_HOME}/tomcat
+
+
 ##########################################
 # Be sure to remove history if it exists #
 ##########################################
 
-RUN rm -rf /tmp/*
-
-RUN mv ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho.war ${CATALINA_HOME}/webapps
-RUN mv ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-style.war ${CATALINA_HOME}/webapps
-RUN ln -s ${CATALINA_HOME} ${PENTAHO_HOME}/tomcat
-
 # USER pentaho
+
 WORKDIR ${PENTAHO_HOME}/tomcat/bin
 
-CMD ["/bin/bash"]
+CMD ["sh", "catalina.sh", "run"]

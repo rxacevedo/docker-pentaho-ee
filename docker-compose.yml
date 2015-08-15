@@ -4,6 +4,9 @@ pba:
     - 8080:8080
   links:
     - db
+  environment:
+    POSTGRES_PASSWORD: postgres
+  mem_limit: 4096m
   command: sh catalina.sh run
 db:
   image: postgres
