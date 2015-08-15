@@ -17,7 +17,7 @@ ENV USER=drwho PASS=sekret
 
 # Install Dependences
 RUN apt-get update; \
-    apt-get install wget unzip git vim -y; \
+    apt-get install wget unzip git postgresql-client-9.4 vim -y; \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir -p ${PENTAHO_HOME}/tmp; useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; chown -R pentaho:pentaho ${PENTAHO_HOME}
@@ -26,8 +26,6 @@ ADD res/* /tmp/
 RUN mkdir -p /tmp/extract
 # This will go away...shh...
 RUN chmod -R 777 /tmp
-
-USER pentaho
 
 # This is for development, Will be replaced by pulling deps from the FTP
 # RUN wget -m -P /tmp ftp://${USER}:${PASS}@supportftp.pentaho.com/Enterprise%20Software/Pentaho_BI_Suite/${PENTAHO_VERSION}-GA/BA-Server/Manual%20Build/
@@ -53,5 +51,12 @@ RUN for i in $(ls -d */); \
 ##########################################
 
 RUN rm -rf /tmp/*
+
+RUN mv ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho.war ${CATALINA_HOME}/webapps
+RUN mv ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-style.war ${CATALINA_HOME}/webapps
+RUN ln -s ${CATALINA_HOME} ${PENTAHO_HOME}/tomcat
+
+# USER pentaho
+WORKDIR ${PENTAHO_HOME}/tomcat/bin
 
 CMD ["/bin/bash"]
