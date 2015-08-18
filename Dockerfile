@@ -61,7 +61,10 @@ RUN mkdir -p ${PENTAHO_HOME}/server/biserver-ee
 
 # Move pentaho-solutions and data into place
 RUN unzip -q components/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-solutions.zip -d ${PENTAHO_HOME}/server/biserver-ee; \
+    rm -rf components/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-solutions.zip; \
     unzip -q components/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-data.zip -d ${PENTAHO_HOME}/server/biserver-ee; \
+    rm -rf components/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-data.zip; \
+    unzip -q components/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/license-installer.zip -d ${PENTAHO_HOME}/server; \
     rm -rf components/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}
 
 # Hackaround for docker/docker#4570
