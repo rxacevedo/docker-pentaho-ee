@@ -9,73 +9,80 @@ ENV COMPONENTS="biserver-manual-ee:paz-plugin-ee:pdd-plugin-ee:pentaho-analysis-
 
 # Set up JAVA_HOME
 RUN . /etc/environment
-ENV PENTAHO_JAVA_HOME $JAVA_HOME
-ENV PENTAHO_JAVA_HOME /usr/lib/jvm/java-1.7.0-openjdk-amd64
 ENV JAVA_HOME /usr/lib/jvm/java-1.7.0-openjdk-amd64
-
-ENV USER=drwho PASS=sekret
+ENV PENTAHO_JAVA_HOME ${JAVA_HOME}
 
 # Install Dependences
 RUN apt-get update; \
     apt-get install wget unzip git postgresql-client-9.4 vim -y; \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN mkdir -p ${PENTAHO_HOME}/tmp; useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; chown -R pentaho:pentaho ${PENTAHO_HOME}
+ADD build/* /tmp/
 
-ADD res/* /tmp/
-# This will go away...shh...
-RUN chmod -R 777 /tmp
+RUN mkdir ${PENTAHO_HOME}; \
+    useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; \
+    chown -R pentaho:pentaho ${PENTAHO_HOME} ${CATALINA_HOME} /tmp/*
 
-# This is for development, Will be replaced by pulling deps from the FTP
+##################################
+# Bring down and install Pentaho #
+##################################
+
+# Get PBA EE
+# ENV USER=USER PASS=PASS
 # RUN wget -m -P /tmp ftp://${USER}:${PASS}@supportftp.pentaho.com/Enterprise%20Software/Pentaho_BI_Suite/${PENTAHO_VERSION}-GA/BA-Server/Manual%20Build/
-              
-# Unzip the things
-RUN for i in $(echo ${COMPONENTS} | tr ':' '\n'); \
-    do echo $i-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip; \
-    /usr/bin/unzip -q /tmp/$i-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip -d  ${PENTAHO_HOME}/tmp; \
-    rm -rf /tmp/$i-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip; \
+
+# Unzip the things, removing the archives as we go
+RUN for PKG in $(echo ${COMPONENTS} | tr ':' '\n'); \
+    do echo "Unzipping $PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip..."; \
+    unzip -q /tmp/$PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip -d /tmp; \
+    rm -rf /tmp/$PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip; \
     done
 
-WORKDIR $PENTAHO_HOME/tmp
+WORKDIR /tmp
 
 # Run the installers headless
-RUN for i in $(ls -d */); \
-    do cd $i; \
-    java -jar installer.jar /tmp/auto-install.xml; \
-    cd ..; \
+RUN for DIR in $(ls -d */); \
+    do echo "Installing $DIR..."; \
+    java -jar $DIR/installer.jar auto-install.xml; \
+    rm -rf $DIR; \
     done
-  
-# Get rid of the downloaded zips
-RUN rm -rf /tmp/*
 
-# Move the wars
-RUN mv ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/*.war ${CATALINA_HOME}/webapps
+#####################################################################
+# Explode the wars in advance so that we can update the context.xml #
+#####################################################################
+
+RUN mkdir -p ${CATALINA_HOME}/webapps/pentaho; \
+    mkdir -p ${CATALINA_HOME}/webapps/pentaho-style; \
+    unzip -q components/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho.war -d ${CATALINA_HOME}/webapps/pentaho; \
+    unzip -q components/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-style.war -d ${CATALINA_HOME}/webapps/pentaho-style
 
 # This is the folder structure that Pentaho expects
 RUN mkdir -p ${PENTAHO_HOME}/server/biserver-ee
 
-# This one doesn't have dist at the end of the filename...
-RUN unzip -q ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-solutions.zip -d ${PENTAHO_HOME}/server/biserver-ee
-RUN unzip -q ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-data.zip -d ${PENTAHO_HOME}/server/biserver-ee
+# Move pentaho-solutions and data into place
+RUN unzip -q components/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-solutions.zip -d ${PENTAHO_HOME}/server/biserver-ee; \
+    unzip -q components/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-data.zip -d ${PENTAHO_HOME}/server/biserver-ee; \
+    rm -rf components/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}
 
-# Done with this
-RUN rm -rf ${PENTAHO_HOME}/biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/
+# Hackaround for docker/docker#4570
+RUN cp -r components/* ${PENTAHO_HOME}/server/biserver-ee/pentaho-solutions/system; \
+    rm -rf *
 
-WORKDIR $PENTAHO_HOME
+RUN ln -s ${CATALINA_HOME} ${PENTAHO_HOME}/server/biserver-ee/tomcat
 
-RUN rm -rf tmp/; \
-    cp -r $(ls | grep '[^server]') ${PENTAHO_HOME}/server/biserver-ee/pentaho-solutions/system; \
-    rm -rf $(ls | grep '[^server]') 
+###########################################
+# Update config and populate the database #
+###########################################
 
-RUN ln -s ${CATALINA_HOME} ${PENTAHO_HOME}/tomcat
-
+# Need Postgres driver
+RUN wget -P ${CATALINA_HOME}/lib https://jdbc.postgresql.org/download/postgresql-9.4-1201.jdbc41.jar
 
 ##########################################
 # Be sure to remove history if it exists #
 ##########################################
 
-# USER pentaho
+USER pentaho
 
-WORKDIR ${PENTAHO_HOME}/tomcat/bin
+WORKDIR ${PENTAHO_HOME}/server/biserver-ee/tomcat/bin
 
 CMD ["sh", "catalina.sh", "run"]
