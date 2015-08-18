@@ -4,7 +4,7 @@ MAINTAINER rxacevedo@fastmail.com
 
 # Set up environment
 ENV PENTAHO_VERSION=5.4.0.1 PENTAHO_PATCH=130
-ENV PENTAHO_HOME=/opt/pentaho
+ENV PENTAHO_HOME=/opt/pentaho/
 ENV COMPONENTS="biserver-manual-ee:paz-plugin-ee:pdd-plugin-ee:pentaho-analysis-ee:pentaho-mobile-plugin:pir-plugin-ee"
 
 # Set up JAVA_HOME
@@ -17,11 +17,8 @@ RUN apt-get update; \
     apt-get install wget unzip git postgresql-client-9.4 vim -y; \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ADD build/* /tmp/
-
-RUN mkdir ${PENTAHO_HOME}; \
-    useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; \
-    chown -R pentaho:pentaho ${PENTAHO_HOME} ${CATALINA_HOME} /tmp/*
+COPY build /tmp/
+COPY scripts ${PENTAHO_HOME}/scripts/
 
 ##################################
 # Bring down and install Pentaho #
@@ -78,11 +75,14 @@ RUN ln -s ${CATALINA_HOME} ${PENTAHO_HOME}/server/biserver-ee/tomcat
 ###########################################
 
 # Need Postgres driver
-RUN wget -P ${CATALINA_HOME}/lib https://jdbc.postgresql.org/download/postgresql-9.4-1201.jdbc41.jar
+ADD https://jdbc.postgresql.org/download/postgresql-9.4-1201.jdbc41.jar ${CATALINA_HOME}/lib/
 
 ##########################################
 # Be sure to remove history if it exists #
 ##########################################
+
+RUN useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; \
+    chown -R pentaho:pentaho ${PENTAHO_HOME} ${CATALINA_HOME}
 
 USER pentaho
 
