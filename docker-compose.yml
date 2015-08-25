@@ -1,15 +1,14 @@
 pba:
-  build: .
+  image: rxacevedo/docker-pentaho-ee
   ports:
     - 8080:8080
   links:
     - db
   environment:
-    POSTGRES_PASSWORD: postgres
-    CATALINA_OPTS: -Xms1024m -Xmx4096m
-  mem_limit: 4096m
-  command: sh catalina.sh run
+    PGUSER: postgres
+    PGHOST: db
+    PGDATABASE: postgres
+  mem_limit: 8092m
+  command: sh -c 'sleep 3; sh startup.sh'
 db:
   image: postgres
-  environment:
-    POSTGRES_PASSWORD: postgres
