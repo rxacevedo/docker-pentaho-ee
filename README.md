@@ -6,6 +6,6 @@ This is still a WIP.
 
 ## TODO
 
-- [ ] Remove HSQLDB database/startup listener references from `web.xml`
+- [x] Remove HSQLDB database/startup listener references from `web.xml`
 - [ ] Only drop/create tables in DB if they don't already exist.
-- [ ] Fix `SolutionContextListener.ERROR_0001 - Solution path is invalid` exception, this may be permissions-related. Current workaround is to hard-code it in, although this shouldn't be necessary.
+- [x] Fix `SolutionContextListener.ERROR_0001 - Solution path is invalid` exception, this may be permissions-related. ~~Current workaround is to hard-code it in, although this shouldn't be necessary.~~ Yeah I'm still hardcoding this but it's scripted to fill in the right path (based on $PENTAHO_HOME) so it's all good.
