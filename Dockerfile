@@ -86,6 +86,7 @@ RUN useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; \
 
 USER pentaho
 
-WORKDIR ${PENTAHO_HOME}/server/biserver-ee/tomcat/bin
+WORKDIR ${PENTAHO_HOME}/scripts
+ENV CATALINA_OPTS="-Xms2048m -Xmx6144m"
 
-CMD ["sh", "catalina.sh", "run"]
+CMD ["sh", "startup.sh"]
