@@ -14,7 +14,7 @@ ENV PENTAHO_JAVA_HOME ${JAVA_HOME}
 
 # Install Dependences
 RUN apt-get update; \
-    apt-get install wget unzip git postgresql-client-9.4 vim -y; \
+    apt-get install wget netcat unzip git postgresql-client-9.4 vim -y; \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY build/auto-install.xml /tmp/
