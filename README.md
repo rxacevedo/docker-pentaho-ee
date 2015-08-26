@@ -29,13 +29,7 @@ docker run -it \
            rxacevedo/docker-pentaho-ee
 ```
 
-You can then access Pentaho (which starts up unlicensed) at http://<docker host>:8080/pentaho.
-
-## TODO
-
-- [x] Remove HSQLDB database/startup listener references from `web.xml`
-- [x] Fix `SolutionContextListener.ERROR_0001 - Solution path is invalid` exception, this may be permissions-related. ~~Current workaround is to hard-code it in, although this shouldn't be necessary.~~ Yeah I'm still hardcoding this but it's scripted to fill in the right path (based on $PENTAHO_HOME) so it's all good.
-- [ ] Only drop/create tables in DB if they don't already exist.
+You can then access Pentaho (which starts up unlicensed) at [http://DOCKER_HOST:8080/pentaho](http://DOCKER_HOST:8080/pentaho).
 
 ## Attribution
 Pentaho BA Server is the sole property of [Pentaho Corporation](http://www.pentaho.com/).
