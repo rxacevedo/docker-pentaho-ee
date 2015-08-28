@@ -27,6 +27,7 @@ docker run -d --name postgres postgres
 docker run -it \
            -e PGUSER=postgres \
            -e PGHOST=postgres \
+           -e PGPORT=5432 \
            -e PGDATABASE=postgres \
            -p 8080:8080 \
            --link postgres:postgres \
