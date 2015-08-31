@@ -91,7 +91,6 @@ RUN useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; \
 #######################
 
 USER pentaho
-ENV CATALINA_OPTS="-Xms2048m -Xmx6144m"
 WORKDIR ${PENTAHO_HOME}/scripts
 
 CMD ["sh", "startup.sh"]
