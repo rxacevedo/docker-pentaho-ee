@@ -19,5 +19,12 @@ if [ ! -f ${PENTAHO_HOME}/.touched ]; then
 
 fi
 
+if [ "${TOMCAT_DEBUG}" = "true" ]; then
+  echo
+  echo "==== Tomcat Debug ENABLED ===="
+  export CATALINA_OPTS="${CATALINA_OPTS} -Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=n"
+fi
+
 # Set up the database and start PBA
-sh setup-postgres.sh; sh run.sh
+sh setup-postgres.sh
+sh run.sh
