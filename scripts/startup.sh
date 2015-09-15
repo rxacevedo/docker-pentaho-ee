@@ -20,4 +20,4 @@ if [ ! -f ${PENTAHO_HOME}/.touched ]; then
 fi
 
 # Set up the database and start PBA
-sh setup_postgres.sh; sh run.sh
+sh setup-postgres.sh; sh run.sh
