@@ -19,6 +19,7 @@ RUN apt-get update; \
     apt-get install wget netcat unzip git postgresql-client-9.4 vim -y; \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Get PBA EE
 COPY build /tmp/
 COPY scripts ${PENTAHO_HOME}/scripts/
 
@@ -26,9 +27,6 @@ COPY scripts ${PENTAHO_HOME}/scripts/
 # Bring down and install Pentaho #
 ##################################
 
-# Get PBA EE
-ENV USER=USER PASS=PASS
-RUN wget -P /tmp --progress=bar:force ftp://${USER}:${PASS}@supportftp.pentaho.com/Enterprise%20Software/Pentaho_BI_Suite/${PENTAHO_VERSION}-GA/BA-Server/Manual%20Build/*
 
 # Unzip components, removing the archives as we go
 RUN for PKG in $(echo ${COMPONENTS} | tr ':' '\n'); \
