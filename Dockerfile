@@ -23,17 +23,22 @@ RUN apt-get update; \
 COPY build /tmp/
 COPY scripts ${PENTAHO_HOME}/scripts/
 
-##################################
-# Bring down and install Pentaho #
-##################################
+RUN useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; \
+    chown -R pentaho:pentaho ${PENTAHO_HOME} ${CATALINA_HOME} /tmp
 
+USER pentaho
+
+################################################################################
+# NOTE: Owning /tmp up front and passing the Pentaho files in already unzipped #
+# shaves almost 2GB from the image.                                            #
+################################################################################
 
 # Unzip components, removing the archives as we go
-RUN for PKG in $(echo ${COMPONENTS} | tr ':' '\n'); \
-    do echo "Unzipping $PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip..."; \
-    unzip -q /tmp/$PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip -d /tmp; \
-    rm -rf /tmp/$PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip; \
-    done
+# RUN for PKG in $(echo ${COMPONENTS} | tr ':' '\n'); \
+#     do echo "Unzipping $PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip..."; \
+#     unzip -q /tmp/$PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip -d /tmp; \
+#     rm -rf /tmp/$PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip; \
+#     done
 
 WORKDIR /tmp
 
@@ -81,14 +86,12 @@ RUN ln -s ${CATALINA_HOME} ${PENTAHO_HOME}/server/biserver-ee/tomcat
 # Need Postgres driver
 ADD https://jdbc.postgresql.org/download/postgresql-9.4-1201.jdbc41.jar ${CATALINA_HOME}/lib/
 
-RUN useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; \
-    chown -R pentaho:pentaho ${PENTAHO_HOME} ${CATALINA_HOME}
-
 #######################
 # Start the BA Server #
 #######################
 
-USER pentaho
 WORKDIR ${PENTAHO_HOME}/scripts
+
+VOLUME ["${CATALINA_HOME}/logs"]
 
 CMD ["sh", "startup.sh"]

@@ -1,3 +1,5 @@
 *.swp
 .DS_Store
 build/*.zip
+build/p*-5.4*
+build/*ee-5.4*
