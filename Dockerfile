@@ -23,6 +23,9 @@ RUN apt-get update; \
 COPY build /tmp/
 COPY scripts ${PENTAHO_HOME}/scripts/
 
+# Postgres driver
+ADD https://jdbc.postgresql.org/download/postgresql-9.4-1201.jdbc41.jar ${CATALINA_HOME}/lib/
+
 RUN useradd -s /bin/bash -d ${PENTAHO_HOME} pentaho; \
     chown -R pentaho:pentaho ${PENTAHO_HOME} ${CATALINA_HOME} /tmp
 
@@ -78,13 +81,6 @@ RUN cp -r * ${PENTAHO_HOME}/server/biserver-ee/pentaho-solutions/system; \
     rm -rf *
 
 RUN ln -s ${CATALINA_HOME} ${PENTAHO_HOME}/server/biserver-ee/tomcat
-
-###########################################
-# Update config and populate the database #
-###########################################
-
-# Need Postgres driver
-ADD https://jdbc.postgresql.org/download/postgresql-9.4-1201.jdbc41.jar ${CATALINA_HOME}/lib/
 
 #######################
 # Start the BA Server #
