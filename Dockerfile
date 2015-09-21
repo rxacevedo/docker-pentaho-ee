@@ -15,9 +15,16 @@ ENV JAVA_HOME /usr/lib/jvm/java-1.7.0-openjdk-amd64
 ENV PENTAHO_JAVA_HOME ${JAVA_HOME}
 
 # Install Dependences
-RUN apt-get update; \
-    apt-get install wget netcat unzip git postgresql-client-9.4 vim -y; \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get update && apt-get install -y \
+    git \
+    netcat \
+    postgresql-client-9.4 \
+    unzip \
+    vim \
+    wget \
+    ; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Get PBA EE
 COPY build /tmp/
@@ -63,13 +70,9 @@ RUN mkdir -p ${CATALINA_HOME}/webapps/pentaho; \
     unzip -q biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho.war -d ${CATALINA_HOME}/webapps/pentaho; \
     rm -rf biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho.war; \
     unzip -q biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-style.war -d ${CATALINA_HOME}/webapps/pentaho-style; \
-    rm -rf biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-style.war
-
-# This is the folder structure that Pentaho expects
-RUN mkdir -p ${PENTAHO_HOME}/server/biserver-ee
-
-# Move pentaho-solutions and data into place
-RUN unzip -q biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-solutions.zip -d ${PENTAHO_HOME}/server/biserver-ee; \
+    rm -rf biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-style.war; \
+    mkdir -p ${PENTAHO_HOME}/server/biserver-ee; \
+    unzip -q biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-solutions.zip -d ${PENTAHO_HOME}/server/biserver-ee; \
     rm -rf biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-solutions.zip; \
     unzip -q biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-data.zip -d ${PENTAHO_HOME}/server/biserver-ee; \
     rm -rf biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-data.zip; \
