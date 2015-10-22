@@ -7,7 +7,7 @@ ENV PENTAHO_VERSION=5.4.0.1 PENTAHO_PATCH=130
 ENV PENTAHO_HOME=/opt/pentaho
 
 # Components to be installed
-ENV COMPONENTS="biserver-manual-ee:paz-plugin-ee:pdd-plugin-ee:pentaho-analysis-ee:pentaho-mobile-plugin:pir-plugin-ee"
+ENV COMPONENTS="biserver-manual-ee:paz-plugin-ee:pdd-plugin-ee:pentaho-mobile-plugin:pir-plugin-ee"
 
 # Set up JAVA_HOME
 RUN . /etc/environment
