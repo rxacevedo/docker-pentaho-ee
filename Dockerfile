@@ -1,9 +1,9 @@
-FROM tomcat:7
+FROM TOMCAT_IMAGE
 
 MAINTAINER rxacevedo@fastmail.com
 
 # Set up environment
-ENV PENTAHO_VERSION=5.4.0.1 PENTAHO_PATCH=130
+ENV PENTAHO_VERSION=TAG_MAJOR PENTAHO_PATCH=TAG_MINOR
 ENV PENTAHO_HOME=/opt/pentaho
 
 # Components to be installed
