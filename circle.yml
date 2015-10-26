@@ -5,10 +5,10 @@ machine:
 dependencies:
   override:
     - docker info
-    - aws s3 cp --recursive s3://$STORE/pba_$TAG_MAJOR-$TAG_MINOR .
+    - aws s3 cp --recursive s3://$STORE/pba_$MAJOR-$MINOR .
     - for z in $(ls | grep zip); do unzip $z -d build; done
     - rm -rf *.zip
-    - docker build -t rxacevedo/docker-pentaho-ee .
+    - docker build -t rxacevedo/docker-pentaho-ee:$MAJOR-$MINOR .
 
 test:
   override:
@@ -21,4 +21,4 @@ deployment:
     branch: master
     commands:
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push rxacevedo/docker-pentaho-ee:$TAG
+      - docker push rxacevedo/docker-pentaho-ee:$MAJOR-$MINOR
