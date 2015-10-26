@@ -6,7 +6,13 @@ This is a Dockerized deployment of the [Pentaho BA Server](http://www.pentaho.co
 
 ## Build
 
-Copy your downloaded Pentaho EE archives into the `build` directory and build the image. As of this writing, the archives are expected to be named the way that they are when downloaded from Pentaho (via Box or the FTP).
+Copy your downloaded Pentaho EE archives into the `build` directory and build the image. As of this writing, the archives are expected to be named the way that they are when downloaded from Pentaho (via Box or the FTP). The Dockerfile has a few parameters that need to be updated in order for the build to work:
+
+- TOMCAT_IMAGE - ex: `tomcat:7`
+- TAG_MAJOR - ex: `5.4.0.1`
+- TAG_MINOR - ex: `130`
+
+This is to allow the image to be built in a CI tool like Circle CI by parameterizing/filling in these values as a pre-build step. Once this is done, the image can be built:
 
 ```bash
 docker build -t rxacevedo/docker-pentaho-ee .

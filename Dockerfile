@@ -1,13 +1,14 @@
-FROM tomcat:7
+FROM TOMCAT_IMAGE
 
 MAINTAINER rxacevedo@fastmail.com
 
 # Set up environment
-ENV PENTAHO_VERSION=5.4.0.1 PENTAHO_PATCH=130
+ENV PENTAHO_VERSION=TAG_MAJOR PENTAHO_PATCH=TAG_MINOR
 ENV PENTAHO_HOME=/opt/pentaho
 
 # Components to be installed
-ENV COMPONENTS="biserver-manual-ee:paz-plugin-ee:pdd-plugin-ee:pentaho-mobile-plugin:pir-plugin-ee"
+ENV COMPONENTS=biserver-manual-ee:paz-plugin-ee:pdd-plugin-ee:pentaho-mobile-plugin:pir-plugin-ee
+ENV COMPONENTS_DIR=/tmp/components
 
 # Set up JAVA_HOME
 RUN . /etc/environment
@@ -20,7 +21,6 @@ RUN apt-get update && apt-get install -y \
     netcat \
     postgresql-client-9.4 \
     unzip \
-    vim \
     wget \
     ; \
     apt-get clean; \
@@ -54,30 +54,30 @@ WORKDIR /tmp
 
 # Run the installers headless
 RUN for DIR in $(ls -d */); \
-    do echo "Installing $DIR..."; \
-    java -jar $DIR/installer.jar auto-install.xml 2>/dev/null; \
-    rm -rf $DIR; \
+    do sh ${HOME}/scripts/run-installer.sh ${DIR} > /dev/null 2>&1; \
+    rm -rf ${DIR}; \
     done
 
 #########################################################################################
 # Explode the wars in advance so that we can update files without having to boot Tomcat #
 #########################################################################################
 
-WORKDIR /tmp/components
+WORKDIR ${COMPONENTS_DIR}
 
-RUN mkdir -p ${CATALINA_HOME}/webapps/pentaho; \
+RUN BISERVER_DIR=$(ls -d */ | grep biserver | sed 's/\///'); \
+    mkdir -p ${CATALINA_HOME}/webapps/pentaho; \
     mkdir -p ${CATALINA_HOME}/webapps/pentaho-style; \
-    unzip -q biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho.war -d ${CATALINA_HOME}/webapps/pentaho; \
-    rm -rf biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho.war; \
-    unzip -q biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-style.war -d ${CATALINA_HOME}/webapps/pentaho-style; \
-    rm -rf biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-style.war; \
+    unzip -q ${BISERVER_DIR}/pentaho.war -d ${CATALINA_HOME}/webapps/pentaho; \
+    rm -rf ${BISERVER_DIR}/pentaho.war; \
+    unzip -q ${BISERVER_DIR}/pentaho-style.war -d ${CATALINA_HOME}/webapps/pentaho-style; \
+    rm -rf ${BISERVER_DIR}/pentaho-style.war; \
     mkdir -p ${PENTAHO_HOME}/server/biserver-ee; \
-    unzip -q biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-solutions.zip -d ${PENTAHO_HOME}/server/biserver-ee; \
-    rm -rf biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-solutions.zip; \
-    unzip -q biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-data.zip -d ${PENTAHO_HOME}/server/biserver-ee; \
-    rm -rf biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/pentaho-data.zip; \
-    unzip -q biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}/license-installer.zip -d ${PENTAHO_HOME}/server; \
-    rm -rf biserver-manual-${PENTAHO_VERSION}-${PENTAHO_PATCH}
+    unzip -q ${BISERVER_DIR}/pentaho-solutions.zip -d ${PENTAHO_HOME}/server/biserver-ee; \
+    rm -rf ${BISERVER_DIR}/pentaho-solutions.zip; \
+    unzip -q ${BISERVER_DIR}/pentaho-data.zip -d ${PENTAHO_HOME}/server/biserver-ee; \
+    rm -rf ${BISERVER_DIR}/pentaho-data.zip; \
+    unzip -q ${BISERVER_DIR}/license-installer.zip -d ${PENTAHO_HOME}/server; \
+    rm -rf ${BISERVER_DIR}
 
 # Hackaround for docker/docker#4570
 RUN cp -r * ${PENTAHO_HOME}/server/biserver-ee/pentaho-solutions/system; \
