@@ -9,7 +9,7 @@ dependencies:
     - for z in $(ls | grep zip); do unzip $z -d build; done
     - rm -rf *.zip
     - sed -i "s/TOMCAT_IMAGE/$TOMCAT_IMAGE/g" Dockerfile
-    - sed -i "s/PENTAHO_VERSION/$PENTAHO_VERSION/g" Dockerfile
+    - sed -i "s/#PENTAHO_VERSION#/$PENTAHO_VERSION/g" Dockerfile
     - docker build -t rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION
 
 test:
