@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$PGHOST" ]; then
+if [ -f "$HOME/.pgpass" -o "$PGHOST" ]; then
 
   echo "Checking if database is up..."
 
@@ -14,22 +14,38 @@ if [ "$PGHOST" ]; then
     exit 0
   fi
 
-  CHK_QUARTZ=`echo "$(psql -U $PGUSER  -h $PGHOST -d $PGDATABASE -l | grep quartz | wc -l)"`
-  CHK_HIBERNATE=`echo "$(psql -U $PGUSER  -h $PGHOST -d $PGDATABASE -l | grep hibernate | wc -l)"`
-  CHK_JCR=`echo "$(psql -U $PGUSER  -h $PGHOST -d $PGDATABASE -l | grep jackrabbit | wc -l)"`
+  CHK_QUARTZ=`echo "$(psql -U $PGUSER -h $PGHOST -p $PGPORt -d $PGDATABASE -l | grep quartz | wc -l)"`
+  CHK_HIBERNATE=`echo "$(psql -U $PGUSER  -h $PGHOST -p $PGPORT -d $PGDATABASE -l | grep hibernate | wc -l)"`
+  CHK_JCR=`echo "$(psql -U $PGUSER  -h $PGHOST -p $PGPORT -d $PGDATABASE -l | grep jackrabbit | wc -l)"`
 
   echo "quartz: $CHK_QUARTZ"
   echo "hibernate: $CHK_HIBERNATE"
   echo "jcr: $CHK_JCR"
 
+
   if [ "$CHK_JCR" -eq "0" ]; then
-    psql -U $PGUSER -h $PGHOST -d $PGDATABASE -f $PENTAHO_HOME/server/biserver-ee/data/postgresql/create_jcr_postgresql.sql
+    if [ "$RDS" ]; then
+      psql -U $PGUSER -h $PGHOST -p $PGPORT -d $PGDATABASE -f $PENTAHO_HOME/rds/jackrabbit.sql
+    else
+      psql -U $PGUSER -h $PGHOST -p $PGPORT -d $PGDATABASE -f $PENTAHO_HOME/server/biserver-ee/data/postgresql/create_jcr_postgresql.sql
+    fi
   fi
+
   if [ "$CHK_HIBERNATE" -eq "0" ]; then
-    psql -U $PGUSER -h $PGHOST -d $PGDATABASE -f $PENTAHO_HOME/server/biserver-ee/data/postgresql/create_repository_postgresql.sql
+    if [ "$RDS" ]; then
+      psql -U $PGUSER -h $PGHOST -p $PGPORT -d $PGDATABASE -f $PENTAHO_HOME/rds/repository.sql
+    else
+      psql -U $PGUSER -h $PGHOST -p $PGPORT -d $PGDATABASE -f $PENTAHO_HOME/server/biserver-ee/data/postgresql/create_repository_postgresql.sql
+    fi
   fi
+
+
   if [ "$CHK_QUARTZ" -eq "0" ]; then
-    psql -U $PGUSER -h $PGHOST -d $PGDATABASE -f $PENTAHO_HOME/server/biserver-ee/data/postgresql/create_quartz_postgresql.sql
+    if [ "$RDS" ]; then
+      psql -U $PGUSER -h $PGHOST -p $PGPORT -d $PGDATABASE -f $PENTAHO_HOME/rds/quarts.sql
+    else
+      psql -U $PGUSER -h $PGHOST -p $PGPORT -d $PGDATABASE -f $PENTAHO_HOME/server/biserver-ee/data/postgresql/create_quartz_postgresql.sql
+    fi
   fi
 
   # DI logging
