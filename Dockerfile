@@ -3,7 +3,7 @@ FROM TOMCAT_IMAGE
 MAINTAINER rxacevedo@fastmail.com
 
 # Set up environment
-ENV PENTAHO_VERSION=TAG_MAJOR PENTAHO_PATCH=TAG_MINOR
+ENV PENTAHO_VERSION=$PENTAHO_VERSION
 ENV PENTAHO_HOME=/opt/pentaho
 
 # Components to be installed
@@ -45,9 +45,9 @@ USER pentaho
 
 # Unzip components, removing the archives as we go
 # RUN for PKG in $(echo ${COMPONENTS} | tr ':' '\n'); \
-#     do echo "Unzipping $PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip..."; \
-#     unzip -q /tmp/$PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip -d /tmp; \
-#     rm -rf /tmp/$PKG-${PENTAHO_VERSION}-${PENTAHO_PATCH}-dist.zip; \
+#     do echo "Unzipping $PKG-${PENTAHO_VERSION}-dist.zip..."; \
+#     unzip -q /tmp/$PKG-${PENTAHO_VERSION}-dist.zip -d /tmp; \
+#     rm -rf /tmp/$PKG-${PENTAHO_VERSION}-dist.zip; \
 #     done
 
 WORKDIR /tmp
