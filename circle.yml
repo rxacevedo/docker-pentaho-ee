@@ -5,7 +5,7 @@ machine:
 dependencies:
   override:
     - docker info
-    - aws s3 cp --recursive s3://$STORE/pba_$PENTAHO_VERSION
+    - aws s3 cp --recursive s3://$STORE/pba/$PENTAHO_VERSION .
     - for z in $(ls | grep zip); do unzip $z -d build; done
     - rm -rf *.zip
     - sed -i "s/TOMCAT_IMAGE/$TOMCAT_IMAGE/g" Dockerfile
