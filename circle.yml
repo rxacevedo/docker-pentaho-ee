@@ -10,7 +10,7 @@ dependencies:
     - rm -rf *.zip
     - sed -i "s/TOMCAT_IMAGE/$TOMCAT_IMAGE/g" Dockerfile
     - sed -i "s/#PENTAHO_VERSION#/$PENTAHO_VERSION/g" Dockerfile
-    - docker build -t rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION
+    - docker build -t rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION .
 
 test:
   override:
