@@ -483,7 +483,7 @@ value="{0}/etc;org.pentaho.security.publish;jcr:read,jcr:readAccessControl,jcr:w
   <Cluster id="Unique_ID ">
     <Journal class="org.apache.jackrabbit.core.journal.DatabaseJournal">
       <param name="revision" value="${rep.home}/revision.log"/>
-      <param name="url" value="jdbc:postgresql://HOSTNAME:PORT/jackrabbit"/>
+      <param name="url" value="jdbc:postgresql://HOST:PORT/jackrabbit"/>
       <param name="driver" value="org.postgresql.Driver"/>
       <param name="user" value="jcr_user"/>
       <param name="password" value="password"/>
