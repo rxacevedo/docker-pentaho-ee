@@ -56,7 +56,7 @@ WORKDIR /tmp
 
 # Run the installers headless
 RUN for DIR in $(ls -d */); \
-    do sh ${HOME}/scripts/run-installer.sh ${DIR} > /dev/null 2>&1; \
+    do sh ${PENTAHO_HOME}/scripts/run-installer.sh ${DIR} > /dev/null 2>&1; \
     rm -rf ${DIR}; \
     done
 
