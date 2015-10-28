@@ -42,7 +42,7 @@ if [ -f "$HOME/.pgpass" -o "$PGHOST" ]; then
 
   if [ "$CHK_QUARTZ" -eq "0" ]; then
     if [ "$RDS" ]; then
-      psql -U $PGUSER -h $PGHOST -p $PGPORT -d $PGDATABASE -f $PENTAHO_HOME/rds/quarts.sql
+      psql -U $PGUSER -h $PGHOST -p $PGPORT -d $PGDATABASE -f $PENTAHO_HOME/rds/quartz.sql
     else
       psql -U $PGUSER -h $PGHOST -p $PGPORT -d $PGDATABASE -f $PENTAHO_HOME/server/biserver-ee/data/postgresql/create_quartz_postgresql.sql
     fi

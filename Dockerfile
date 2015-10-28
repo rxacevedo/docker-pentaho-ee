@@ -29,6 +29,8 @@ RUN apt-get update && apt-get install -y \
 # Get PBA EE
 COPY build /tmp/
 COPY scripts ${PENTAHO_HOME}/scripts/
+COPY rds ${PENTAHO_HOME}/rds/
+COPY cluster ${PENTAHO_HOME}/cluster/
 
 # Postgres driver
 ADD https://jdbc.postgresql.org/download/postgresql-9.4-1201.jdbc41.jar ${CATALINA_HOME}/lib/
