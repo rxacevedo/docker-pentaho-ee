@@ -14,7 +14,7 @@ dependencies:
 test:
   override:
     - docker run -d --name postgres postgres
-    - docker run -d --link postgres:postgres -p 8080:8080 rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION; sleep 120
+    - docker run -d --link postgres:postgres -p 8080:8080 -e PGUSER=postgres -e PGHOST=postgres -e PGPORT=5432 -e PGDATABASE=postgres rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION; sleep 60
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/ | head -n1 | grep -o '200'        # Checks that Tomcat is up
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/pentaho | head -n1 | grep -o '302' # Checks that the servlet at /pentaho is up
 
