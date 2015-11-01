@@ -40,5 +40,11 @@ docker run -it \
 
 You can then access Pentaho (which starts up unlicensed) at [http://DOCKER_HOST:8080/pentaho](http://DOCKER_HOST:8080/pentaho).
 
+### Amazon RDS
+If you are using Amazon RDS (Postgres), you will need to pass `-e RDS=true` when starting your container. This is because Amazon RDS' Postgres implemention has slightly different default permissions set up. You will also need to pass in/create a `.pgpass` file in the `$HOME` directory of the pentaho user for both `postgres` and `pentaho_user`. This will allow the `psql` client to connect to the database without the need for passwords to be passed on the CLI when applying the DDL.
+
+### Clustering
+If you would like to cluster the BA server, pass `-e CLUSTERED=true` when starting your container. This will cause the bootstrap script to use different configuration files for Jackrabbit and Quartz to facilitate clustering. The node name for the Jackrabbit journal will use the container's hostname.
+
 ## Attribution
 Pentaho BA Server is the sole property of [Pentaho Corporation](http://www.pentaho.com/).

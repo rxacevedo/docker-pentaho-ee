@@ -27,4 +27,5 @@ fi
 
 # Set up the database and start PBA
 sh setup-postgres.sh
+if [ "${CLUSTERED}" ]; then sh setup-clustering.sh; fi
 sh run.sh
