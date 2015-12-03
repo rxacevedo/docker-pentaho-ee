@@ -4,17 +4,20 @@ machine:
 
 dependencies:
   override:
-    - docker info
+    - openssl s_client -connect $DTR:443 -showcerts </dev/null 2> /dev/null | openssl x509 -outform PEM | cat > /tmp/$DTR.crt
+    - sudo cat /tmp/$DTR.crt /etc/ssl/certs/ca-certificates.crt > /tmp/ca-certificates-full.crt
+    - sudo cp /tmp/ca-certificates-full.crt /etc/ssl/certs/ca-certificates.crt
+    - sudo service docker restart
     - aws s3 cp --recursive s3://$STORE/pba/$PENTAHO_VERSION .
     - for z in $(ls | grep zip); do unzip $z -d build; rm $z; done
     - sed -i "s/TOMCAT_IMAGE/$TOMCAT_IMAGE/g" Dockerfile
     - sed -i "s/#PENTAHO_VERSION#/$PENTAHO_VERSION/g" Dockerfile
-    - docker build -t rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION .
+    - docker build -t base/docker-pentaho-ee:$PENTAHO_VERSION .
 
 test:
   override:
     - docker run -d --name postgres postgres; sleep 10
-    - docker run -d --link postgres:postgres -p 8080:8080 -e PGUSER=postgres -e PGHOST=postgres -e PGPORT=5432 -e PGDATABASE=postgres rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION; sleep 30
+    - docker run -d --link postgres:postgres -p 8080:8080 -e PGUSER=postgres -e PGHOST=postgres -e PGPORT=5432 -e PGDATABASE=postgres base/docker-pentaho-ee:$PENTAHO_VERSION; sleep 30
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/ | head -n1 | grep -o '200'        # Checks that Tomcat is up
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/pentaho | head -n1 | grep -o '302' # Checks that the servlet at /pentaho is up
 
@@ -23,8 +26,10 @@ deployment:
     branch: master
     commands:
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker tag base/docker-pentaho-ee:$PENTAHO_VERSION rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION
       - docker push rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION
-    branch: feat/rds
+    branch: feat/use-dtr
     commands:
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION
+      - docker login -e " " -u $DTR_USER -p $DTR_PASS https://registry.seibelsdata.com
+      - docker tag base/docker-pentaho-ee:$PENTAHO_VERSION $DTR/seibelsbi/docker-pentaho-ee:$PENTAHO_VERSION
+      - docker push $DTR/seibelsbi/docker-pentaho-ee:$PENTAHO_VERSION
