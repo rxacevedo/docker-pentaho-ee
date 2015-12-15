@@ -4,10 +4,6 @@ machine:
 
 dependencies:
   override:
-    - openssl s_client -connect $DTR:443 -showcerts </dev/null 2> /dev/null | openssl x509 -outform PEM | cat > /tmp/$DTR.crt
-    - sudo cat /tmp/$DTR.crt /etc/ssl/certs/ca-certificates.crt > /tmp/ca-certificates-full.crt
-    - sudo cp /tmp/ca-certificates-full.crt /etc/ssl/certs/ca-certificates.crt
-    - sudo service docker restart
     - aws s3 cp --recursive s3://$STORE/pba/$PENTAHO_VERSION .
     - for z in $(ls | grep zip); do unzip $z -d build; rm $z; done
     - sed -i "s/TOMCAT_IMAGE/$TOMCAT_IMAGE/g" Dockerfile
