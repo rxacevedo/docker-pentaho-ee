@@ -4,6 +4,7 @@ machine:
 
 dependencies:
   override:
+    - sudo pip install --upgrade awscli # Get latest for awscli for ECR compat
     - aws s3 cp --recursive s3://$STORE/pba/$PENTAHO_VERSION .
     - for z in $(ls | grep zip); do unzip $z -d build; rm $z; done
     - sed -i "s/TOMCAT_IMAGE/$TOMCAT_IMAGE/g" Dockerfile
@@ -26,6 +27,6 @@ deployment:
       - docker push rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION
     branch: feat/use-dtr
     commands:
-      - docker login -e " " -u $DTR_USER -p $DTR_PASS https://registry.seibelsdata.com
-      - docker tag base/docker-pentaho-ee:$PENTAHO_VERSION $DTR/seibelsbi/docker-pentaho-ee:$PENTAHO_VERSION
-      - docker push $DTR/seibelsbi/docker-pentaho-ee:$PENTAHO_VERSION
+      - aws ecr --region us-east-1 get-login | sh
+      - docker tag base/docker-pentaho-ee:$PENTAHO_VERSION $DTR/docker-pentaho-ee:$PENTAHO_VERSION
+      - docker push $DTR/docker-pentaho-ee:$PENTAHO_VERSION
