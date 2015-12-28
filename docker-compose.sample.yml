@@ -1,5 +1,5 @@
 pba:
-  image: REGISTRY_URL/docker-pentaho-ee:5.4.0.1-130
+  image: REGISTRY_URL/docker-pentaho-ee
   ports:
     - 8080:8080
   links:

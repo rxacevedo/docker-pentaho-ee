@@ -10,12 +10,12 @@ dependencies:
     - for z in $(ls | grep zip); do unzip $z -d build; rm $z; done
     - sed -i "s/BASE_IMAGE/$BASE_IMAGE/g" Dockerfile
     - sed -i "s/#PENTAHO_VERSION#/$PENTAHO_VERSION/g" Dockerfile
-    - docker build -t $REGISTRY_URL/docker-pentaho-ee:$PENTAHO_VERSION .
+    - sed -i "s/REGISTRY_URL/$REGISTRY_URL/g" docker-compose.sample.yml
+    - docker build -t $REGISTRY_URL/docker-pentaho-ee .
 
 test:
   override:
-    - docker run -d --name postgres postgres; sleep 10
-    - docker run -d --link postgres:postgres -p 8080:8080 -e PGUSER=postgres -e PGHOST=postgres -e PGPORT=5432 -e PGDATABASE=postgres $REGISTRY_URL/docker-pentaho-ee:$PENTAHO_VERSION; sleep 30
+    - docker-compose -f docker-compose.sample.yml up; sleep 30
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/ | head -n1 | grep -o '200'        # Checks that Tomcat is up
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/pentaho | head -n1 | grep -o '302' # Checks that the servlet at /pentaho is up
 
@@ -23,6 +23,6 @@ deployment:
   hub:
     branch: master
     commands:
-      - docker tag $REGISTRY_URL/docker-pentaho-ee:$PENTAHO_VERSION $REGISTRY_URL/docker-pentaho-ee:latest
+      - docker push $REGISTRY_URL/docker-pentaho-ee
+      - docker tag $REGISTRY_URL/docker-pentaho-ee $REGISTRY_URL/docker-pentaho-ee:$PENTAHO_VERSION
       - docker push $REGISTRY_URL/docker-pentaho-ee:$PENTAHO_VERSION
-      - docker push $REGISTRY_URL/docker-pentaho-ee:latest
