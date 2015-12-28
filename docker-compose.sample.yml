@@ -1,12 +1,12 @@
 pba:
-  image: rxacevedo/docker-pentaho-ee
+  image: REGISTRY_URL/docker-pentaho-ee:5.4.0.1-130
   ports:
     - 8080:8080
   links:
-    - db
+    - db:postgres
   environment:
     PGUSER: postgres
-    PGHOST: db
+    PGHOST: postgres
     PGPORT: 5432
     PGDATABASE: postgres
   mem_limit: 8092m

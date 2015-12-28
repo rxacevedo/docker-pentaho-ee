@@ -1,21 +1,18 @@
 # docker-pentaho-ee
 
-[![Join the chat at https://gitter.im/rxacevedo/docker-pentaho-ee](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rxacevedo/docker-pentaho-ee?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-This is a Dockerized deployment of the [Pentaho BA Server](http://www.pentaho.com/product/business-visualization-analytics) (Enterprise Edition). Because the enterprise distribution is not freely available online, the required archives must be placed in the `build` directory by the user. This also means (at present) that there can be no automated build on [Docker Hub](https://hub.docker.com/).
+This is a Dockerized deployment of the [Pentaho BA Server](http://www.pentaho.com/product/business-visualization-analytics) (Enterprise Edition). Because the enterprise distribution is not freely available online, the required archives must be placed in the `build` directory by the user.
 
 ## Build
 
-Copy your downloaded Pentaho EE archives into the `build` directory and build the image. As of this writing, the archives are expected to be named the way that they are when downloaded from Pentaho (via Box or the FTP). The Dockerfile has a few parameters that need to be updated in order for the build to work:
+Copy your downloaded Pentaho EE archives into the `build` directory and build the image (your favorite CI tool can do this). As of this writing, the archives are expected to be named the way that they are when downloaded from Pentaho (via Box or the FTP). The Dockerfile has a few parameters that need to be updated in order for the build to work:
 
-- TOMCAT_IMAGE - ex: `tomcat:7`
-- TAG_MAJOR - ex: `5.4.0.1`
-- TAG_MINOR - ex: `130`
+- BASE_IMAGE - ex: `tomcat:7`
+- PENTAHO_VERSION - ex: `5.4.0.1-130`
 
-This is to allow the image to be built in a CI tool like Circle CI by parameterizing/filling in these values as a pre-build step. Once this is done, the image can be built:
+This is to allow the image to be built in CI by parameterizing/filling in these values as a pre-build step. Once this is done, the image can be built:
 
 ```bash
-docker build -t rxacevedo/docker-pentaho-ee .
+docker build -t seibelsbi/docker-pentaho-ee .
 ```
 
 ## Run

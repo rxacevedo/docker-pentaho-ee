@@ -1,4 +1,4 @@
-FROM TOMCAT_IMAGE
+FROM BASE_IMAGE
 
 MAINTAINER rxacevedo@fastmail.com
 

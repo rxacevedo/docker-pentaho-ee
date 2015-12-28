@@ -5,16 +5,17 @@ machine:
 dependencies:
   override:
     - sudo pip install --upgrade awscli # Get latest for awscli for ECR compat
-    - aws s3 cp --recursive s3://$STORE/pba/$PENTAHO_VERSION .
+    - aws ecr --region us-east-1 get-login | sh
+    - aws s3 cp --recursive s3://$ARTIFACT_BUCKET/pba/$PENTAHO_VERSION .
     - for z in $(ls | grep zip); do unzip $z -d build; rm $z; done
-    - sed -i "s/TOMCAT_IMAGE/$TOMCAT_IMAGE/g" Dockerfile
+    - sed -i "s/BASE_IMAGE/$BASE_IMAGE/g" Dockerfile
     - sed -i "s/#PENTAHO_VERSION#/$PENTAHO_VERSION/g" Dockerfile
-    - docker build -t base/docker-pentaho-ee:$PENTAHO_VERSION .
+    - docker build -t $REGISTRY_URL/docker-pentaho-ee:$PENTAHO_VERSION .
 
 test:
   override:
     - docker run -d --name postgres postgres; sleep 10
-    - docker run -d --link postgres:postgres -p 8080:8080 -e PGUSER=postgres -e PGHOST=postgres -e PGPORT=5432 -e PGDATABASE=postgres base/docker-pentaho-ee:$PENTAHO_VERSION; sleep 30
+    - docker run -d --link postgres:postgres -p 8080:8080 -e PGUSER=postgres -e PGHOST=postgres -e PGPORT=5432 -e PGDATABASE=postgres $REGISTRY_URL/docker-pentaho-ee:$PENTAHO_VERSION; sleep 30
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/ | head -n1 | grep -o '200'        # Checks that Tomcat is up
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/pentaho | head -n1 | grep -o '302' # Checks that the servlet at /pentaho is up
 
@@ -22,11 +23,6 @@ deployment:
   hub:
     branch: master
     commands:
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker tag base/docker-pentaho-ee:$PENTAHO_VERSION rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION
-      - docker push rxacevedo/docker-pentaho-ee:$PENTAHO_VERSION
-    branch: feat/use-dtr
-    commands:
-      - aws ecr --region us-east-1 get-login | sh
-      - docker tag base/docker-pentaho-ee:$PENTAHO_VERSION $DTR/docker-pentaho-ee:$PENTAHO_VERSION
-      - docker push $DTR/docker-pentaho-ee:$PENTAHO_VERSION
+      - docker tag $REGISTRY_URL/docker-pentaho-ee:$PENTAHO_VERSION $REGISTRY_URL/docker-pentaho-ee:latest
+      - docker push $REGISTRY_URL/docker-pentaho-ee:$PENTAHO_VERSION
+      - docker push $REGISTRY_URL/docker-pentaho-ee:latest
