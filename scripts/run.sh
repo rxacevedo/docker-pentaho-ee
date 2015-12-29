@@ -1,1 +1,1 @@
-sh ${CATALINA_HOME}/bin/catalina.sh run
+${CATALINA_HOME}/bin/catalina.sh run

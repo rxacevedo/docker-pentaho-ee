@@ -10,6 +10,6 @@ pba:
     PGPORT: 5432
     PGDATABASE: postgres
   mem_limit: 8092m
-  command: sh -c 'sleep 5; sh startup.sh'
+  command: bash -c 'sleep 5; ./startup.sh'
 db:
   image: postgres

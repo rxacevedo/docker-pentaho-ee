@@ -56,7 +56,7 @@ WORKDIR /tmp
 
 # Run the installers headless
 RUN for DIR in $(ls -d */); \
-    do sh ${PENTAHO_HOME}/scripts/run-installer.sh ${DIR} > /dev/null 2>&1; \
+    do ${PENTAHO_HOME}/scripts/run-installer.sh ${DIR} > /dev/null 2>&1; \
     rm -rf ${DIR}; \
     done
 
@@ -95,4 +95,4 @@ WORKDIR ${PENTAHO_HOME}/scripts
 
 VOLUME ["${CATALINA_HOME}/logs"]
 
-CMD ["sh", "startup.sh"]
+CMD ["./startup.sh"]
