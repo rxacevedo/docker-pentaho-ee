@@ -9,7 +9,7 @@ dependencies:
     - sed -i "s/#BASE_IMAGE#/$BASE_IMAGE/g" Dockerfile
     - sed -i "s/#PENTAHO_VERSION#/$PENTAHO_VERSION/g" Dockerfile
     - sed -i "s/#REGISTRY_URL#/$REGISTRY_URL/g" docker-compose.sample.yml
-    - docker build -t $REGISTRY_URL/docker-pentaho-ee .
+    - docker build -t $REGISTRY_URL/seibelsbi/docker-pentaho-ee .
 
 test:
   override:
@@ -23,6 +23,6 @@ deployment:
     owner: seibelsbi
     commands:
       - docker login -e=$REGISTRY_EMAIL -u=$REGISTRY_USER -p=$REGISTRY_PASSWORD $REGISTRY_URL
-      - docker tag $REGISTRY_URL/docker-pentaho-ee $REGISTRY_URL/docker-pentaho-ee:$PENTAHO_VERSION
-      - docker push $REGISTRY_URL/docker-pentaho-ee
-      - docker push $REGISTRY_URL/docker-pentaho-ee:$PENTAHO_VERSION
+      - docker tag $REGISTRY_URL/seibelsbi/docker-pentaho-ee $REGISTRY_URL/seibelsbi/docker-pentaho-ee:$PENTAHO_VERSION
+      - docker push $REGISTRY_URL/seibelsbi/docker-pentaho-ee:$PENTAHO_VERSION
+      - docker push $REGISTRY_URL/seibelsbi/docker-pentaho-ee
