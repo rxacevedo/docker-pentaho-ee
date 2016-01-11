@@ -1,4 +1,4 @@
-FROM BASE_IMAGE
+FROM #BASE_IMAGE#
 
 MAINTAINER rxacevedo@fastmail.com
 
