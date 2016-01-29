@@ -91,8 +91,11 @@ RUN ln -s ${CATALINA_HOME} ${PENTAHO_HOME}/server/biserver-ee/tomcat
 # Start the BA Server #
 #######################
 
+RUN mkdir ${PENTAHO_HOME}/logs
+
 WORKDIR ${PENTAHO_HOME}/scripts
 
 VOLUME ["${CATALINA_HOME}/logs"]
+VOLUME ["${PENTAHO_HOME}/logs"]
 
 CMD ["./startup.sh"]
