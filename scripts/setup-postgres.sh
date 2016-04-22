@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env sh
 
 set -e
 
@@ -21,7 +21,6 @@ if [ -f "${HOME}/.pgpass" -o "${PGHOST}" ]; then
   echo "quartz: ${CHK_QUARTZ}"
   echo "hibernate: ${CHK_HIBERNATE}"
   echo "jcr: ${CHK_JCR}"
-
 
   if [ "${CHK_JCR}" -eq "0" ]; then
     if [ "${RDS}" ]; then
@@ -54,4 +53,8 @@ if [ -f "${HOME}/.pgpass" -o "${PGHOST}" ]; then
   # Sample data
   # psql -U ${PGUSER} -h ${PGHOST} -p ${PGPORT} -d ${PGDATABASE} -f $PENTAHO_HOME/server/biserver-ee/data/postgresql/pentaho_mart_postgresql.sql
 
+else
+  echo "##########################################"
+  echo "# No .pgpass file or PGXXX environment variables found, skipping DDL... #"
+  echo "##########################################"
 fi

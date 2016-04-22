@@ -3,17 +3,13 @@ FROM #BASE_IMAGE#
 MAINTAINER rxacevedo@fastmail.com
 
 # Set up environment
-ENV PENTAHO_VERSION=$PENTAHO_VERSION
+ENV PENTAHO_VERSION=#PENTAHO_VERSION#
 ENV PENTAHO_HOME=/opt/pentaho
+ENV SOLUTION_PATH=${PENTAHO_HOME}/server/biserver-ee/pentaho-solutions
 
 # Components to be installed
 ENV COMPONENTS=biserver-manual-ee:paz-plugin-ee:pdd-plugin-ee:pentaho-mobile-plugin:pir-plugin-ee
 ENV COMPONENTS_DIR=/tmp/components
-
-# Set up JAVA_HOME
-RUN . /etc/environment
-ENV JAVA_HOME /usr/lib/jvm/java-1.7.0-openjdk-amd64
-ENV PENTAHO_JAVA_HOME ${JAVA_HOME}
 
 # Install Dependences
 RUN apt-get update && apt-get install -y \
@@ -28,6 +24,7 @@ RUN apt-get update && apt-get install -y \
 
 # Get PBA EE
 COPY build /tmp/
+COPY patches /tmp/patches/
 COPY scripts ${PENTAHO_HOME}/scripts/
 COPY rds ${PENTAHO_HOME}/rds/
 COPY cluster ${PENTAHO_HOME}/cluster/
@@ -55,8 +52,9 @@ USER pentaho
 WORKDIR /tmp
 
 # Run the installers headless
-RUN for DIR in $(ls -d */); \
-    do ${PENTAHO_HOME}/scripts/run-installer.sh ${DIR} > /dev/null 2>&1; \
+RUN for DIR in $(ls -d */ | grep -v 'patches'); \
+    do \
+    ${PENTAHO_HOME}/scripts/run-installer.sh ${DIR}; \
     rm -rf ${DIR}; \
     done
 
@@ -87,6 +85,18 @@ RUN cp -r * ${PENTAHO_HOME}/server/biserver-ee/pentaho-solutions/system; \
 
 RUN ln -s ${CATALINA_HOME} ${PENTAHO_HOME}/server/biserver-ee/tomcat
 
+# Install patches
+WORKDIR /tmp/patches
+
+RUN for ZIP in $(ls | grep zip | sort); do \
+    OUT_DIR="${ZIP%.*}"; \
+    echo "Unizipping ${ZIP} to ${OUT_DIR}..."; \
+    unzip -q ${ZIP}; \
+    NEW_ZIP=$(ls ${OUT_DIR}/BIServer/ | grep '.zip' | head -n1); \
+    echo "Unizipping ${NEW_ZIP} to biserver-ee..."; \
+    unzip -o -q -d ${PENTAHO_HOME}/server/biserver-ee/ ${OUT_DIR}/BIServer/${NEW_ZIP}; \
+    done
+
 #######################
 # Start the BA Server #
 #######################
@@ -95,4 +105,4 @@ WORKDIR ${PENTAHO_HOME}/scripts
 
 VOLUME ["${CATALINA_HOME}/logs"]
 
-CMD ["./startup.sh"]
+CMD ["sh", "startup.sh"]

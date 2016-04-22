@@ -9,15 +9,18 @@ dependencies:
     - wget https://github.com/jwilder/docker-squash/releases/download/v0.2.0/docker-squash-linux-amd64-v0.2.0.tar.gz
     - sudo tar -C /usr/local/bin -xzvf docker-squash-linux-amd64-v0.2.0.tar.gz
     - aws s3 cp --recursive s3://$ARTIFACT_BUCKET/pba/$PENTAHO_VERSION .
+    - aws s3 cp --recursive s3://$ARTIFACT_BUCKET/pba/service_packs/$PENTAHO_VERSION patches/
     - for z in $(ls | grep zip); do unzip $z -d build; rm $z; done
     - sed -i "s/#BASE_IMAGE#/$BASE_IMAGE/g" Dockerfile
     - sed -i "s/#PENTAHO_VERSION#/$PENTAHO_VERSION/g" Dockerfile
     - sed -i "s/#REGISTRY_URL#/$REGISTRY_URL/g" docker-compose.sample.yml
     - docker build -t tmp .
-    - docker save tmp | sudo docker-squash -t $REGISTRY_URL/seibelsbi/docker-pentaho-ee | docker load
+    - docker save tmp | sudo docker-squash -t $REGISTRY_URL/seibelsbi/docker-pentaho-ee | docker load:
+        timeout: 900
 
 test:
   override:
+    - for f in scripts/*; do sh -n $f; done || echo 'Ruh roh! Something is not sh-compliant (bashisms maybe?)'
     - docker-compose -f docker-compose.sample.yml up -d; sleep 30
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/ | head -n1 | grep -o '200'        # Checks that Tomcat is up
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/pentaho | head -n1 | grep -o '302' # Checks that the servlet at /pentaho is up

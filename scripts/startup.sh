@@ -1,7 +1,15 @@
+#!/usr/bin/env sh
+
 # Update config files
 
 set -e
 
+# TOOD: Currently doesn't work (Marketplace OSGI bundle doesn't seem to load)
+if [ 6 -le "${PENTAHO_VERSION%.*.*.*}" ] && [ "${MARKETPLACE}" ]; then
+  sed -i 's/\(featuresBoot=\)\(.*\)/\1\2,pentaho-marketplace/g' $PENTAHO_HOME/server/biserver-ee/pentaho-solutions/system/karaf/etc/org.apache.karaf.features.cfg
+fi
+
+# TODO: Make this unnecessary
 if [ ! -f ${PENTAHO_HOME}/.touched ]; then
 
   sed -i "s/localhost/$PGHOST/g" $CATALINA_HOME/webapps/pentaho/META-INF/context.xml
