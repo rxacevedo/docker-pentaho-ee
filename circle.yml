@@ -20,7 +20,7 @@ dependencies:
 
 test:
   override:
-    - for f in scripts/*; do sh -n $f; done || echo 'Ruh roh! Something is not sh-compliant (bashisms maybe?)'
+    - sh -n scripts/* || echo 'Ruh roh! Something is not sh-compliant (bashisms maybe?)'
     - docker-compose -f docker-compose.sample.yml up -d; sleep 30
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/ | head -n1 | grep -o '200'        # Checks that Tomcat is up
     - curl -sI --retry 10 --retry-delay 5 -v http://localhost:8080/pentaho | head -n1 | grep -o '302' # Checks that the servlet at /pentaho is up

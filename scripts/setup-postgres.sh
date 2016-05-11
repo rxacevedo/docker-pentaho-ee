@@ -2,7 +2,7 @@
 
 set -e
 
-if [ -f "${HOME}/.pgpass" -o "${PGHOST}" ]; then
+if [ -r "${HOME}/.pgpass" -o "${PGHOST}" ]; then
 
   echo "Checking if database is up..."
 
